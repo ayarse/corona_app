@@ -2,11 +2,15 @@ import 'package:corona_app/app/repositories/data_repository.dart';
 import 'package:corona_app/app/services/api_service.dart';
 import 'package:corona_app/app/ui/dashboard.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'app/services/api.dart';
 
-void main() {
+void main() async {
+  Intl.defaultLocale = 'en_GB';
+  await initializeDateFormatting();
   runApp(MyApp());
 }
 
