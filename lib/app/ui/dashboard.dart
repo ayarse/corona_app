@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:corona_app/app/repositories/data_repository.dart';
 import 'package:corona_app/app/repositories/endpoints_data.dart';
 import 'package:corona_app/app/services/api.dart';
 import 'package:corona_app/app/ui/endpoint_card.dart';
 import 'package:corona_app/app/ui/last_updated_status_text.dart';
+import 'package:corona_app/app/ui/show_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,9 +18,26 @@ class _DashboardState extends State<Dashboard> {
   EndpointsData _endpointsData;
 
   Future<void> _updateData() async {
-    final dataRepository = Provider.of<DataRepository>(context, listen: false);
-    final endpointsData = await dataRepository.getAllEndpointData();
-    setState(() => _endpointsData = endpointsData);
+    try {
+      final dataRepository =
+          Provider.of<DataRepository>(context, listen: false);
+      final endpointsData = await dataRepository.getAllEndpointData();
+      setState(() => _endpointsData = endpointsData);
+    } on SocketException catch (_) {
+      showAlertDialog(
+        context: context,
+        title: 'Connection Error',
+        content: 'Could not retrieve data. Please try again later.',
+        defaultActionText: 'OK',
+      );
+    } catch (_) {
+      showAlertDialog(
+        context: context,
+        title: 'Unknown Error',
+        content: 'Please contact support or try again later.',
+        defaultActionText: 'OK',
+      );
+    }
   }
 
   @override
@@ -41,8 +61,7 @@ class _DashboardState extends State<Dashboard> {
           onRefresh: _updateData,
           child: ListView(
             children: <Widget>[
-              LastUpdatedStatusText(
-                  text: formatter.lastUpdatedStatusText()),
+              LastUpdatedStatusText(text: formatter.lastUpdatedStatusText()),
               for (var endpoint in Endpoint.values)
                 EndpointCard(
                   endpoint: endpoint,
